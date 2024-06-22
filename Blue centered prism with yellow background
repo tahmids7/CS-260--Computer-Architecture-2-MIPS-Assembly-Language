@@ -1,0 +1,193 @@
+
+.data
+# DONOTMODIFYTHISLINE
+frameBuffer: 
+.space 0x80000
+w: 
+.word 217
+h: 
+.word 99
+d: 
+.word 47
+cr: 
+.word 10 
+cg: 
+.word 10 
+cb: 
+.word 10 
+# DONOTMODIFYTHISLINE
+# Your other variables go BELOW here only
+.text
+li $s0, 512 # bitmap screen display width
+li $s1, 256 # bitmap screen display height
+lw $s2, h # height variable 
+lw $s3, d # distance variable
+lw $s4, w # width variable
+li $s5, 0x00FFFF00 # color yellow
+la $t2, frameBuffer # representing top left pixel
+setYellowBackground:
+ 
+li $t3, 0 # establishing row counter
+ 
+li $t4, 0 # establishing column counter
+ yellow_loop:
+ 
+sw $s5, 0($t2) # store yellow in current location
+ 
+addi $t2, $t2, 4 # shift location by 1 to the right
+ 
+addi $t4, $t4, 1 # add 1 to the column counter
+ 
+bne $t4, $s0, yellow_loop # if the column counter is not equal to screen width, repeat yellow_loop
+ 
+addi $t3, $t3, 1 #shift location by 1 to the right
+ 
+li $t4, 0 
+ 
+bne $t3, $s1, yellow_loop #if t3 is not equal to screen width, repeat yellow_loop
+ 
+la $t2, frameBuffer # starting again from the top left pixel
+ 
+add $t3, $s2, $s3 # h + d
+ 
+sub $t3, $s1, $t3 # 256 - (h + d)
+ 
+srl $t5, $t3, 1 # (256 - (h + d)) / 2
+ 
+li $s5, 0x00FFFF00 # color yellow
+setBlueBackground:
+ 
+li $t3, 0 # establishing row counter
+ 
+li $t4, 0 # establishing column counter
+ blue_loop:
+ 
+sw $s5, 0($t2) # store yellow in current location
+ 
+addi $t2, $t2, 4 # shift location 1 to the right
+ 
+addi $t4, $t4, 1 # column counter increased by 1
+ 
+bne $t4, $s0, blue_loop # if column counter is not equal to screen width, repeat blue_loop
+ 
+addi $t3, $t3, 1
+ 
+li $t4, 0
+ 
+bne $t3, $t5, blue_loop 
+#if t3 is not equal to t5, repeat blue_loop
+ 
+li $s5, 0x00ADD8E6 # color light blue
+ 
+add $t1, $s3, $s4 # w + d
+ 
+sub $t1, $s0, $t1 # 512 - (w + d)
+ 
+srl $t1, $t1, 1 # (512 - (w + d)) / 2
+ 
+add $t1, $t1, $s3 # (512 - (w + d)) / 2) + d
+ 
+sll $t1, $t1, 2 # 4 * ((512 - (w + d) / 2) + d))
+ 
+add $t2, $t2, $t1 # move to centered location at the top left corner of the top face of the cube 
+topFace:
+ 
+li $t3, 0 # establishing row counter
+ 
+li $t4, 0 # establishing column counter
+ 
+sll $t1, $s4, 2
+ 
+topface_loop:
+ 
+sw $s5, 0($t2) # store light blue in location
+ 
+addi $t2, $t2, 4 # shift location 1 to the right
+ 
+addi $t4, $t4, 1 # column counter incremented by 1
+ 
+bne $t4, $s4, topface_loop 
+#if column counter is not equal to width variable, repeat topface_loop
+ 
+addi $t2, $t2, 2044
+ 
+sub $t2, $t2, $t1
+ 
+addi $t3, $t3, 1
+ 
+li $t4, 0
+ 
+bne $t3, $s3, topface_loop #if row counter is not equal to distance variable, repeat topface_loop
+ 
+addi $t2, $t2, 4
+ 
+li $s5, 0x000000FF
+frontface:
+ 
+li $t3, 0 # row counter
+ 
+li $t4, 0 # column counter
+ 
+frontface_loop:
+ 
+sw $s5, 0($t2) # store yellow in current location
+ 
+addi $t2, $t2, 4 # shift current location one right
+ 
+addi $t4, $t4, 1 # add one to column counter
+ 
+bne $t4, $s4, frontface_loop # if column counter is not equal to screen width, repeat frontface_loop
+ 
+addi $t2, $t2, 2048
+ 
+sub $t2, $t2, $t1
+ 
+addi $t3, $t3, 1
+ 
+li $t4, 0
+
+ 
+bne $t3, $s2, frontface_loop 
+#if row counter is not equal to height variable, repeat frontface_loop
+ 
+addi $t2, $t2, -4096
+ 
+add $t2, $t2, $t1
+ 
+li $s5, 0x00FF00FF
+remainingface:
+ 
+li $t3, 0
+ 
+li $t4, 0
+ 
+li $t5, 0
+ 
+remainingface_loop:
+ 
+sw $s5, 0($t2) # store yellow in location
+ 
+addi $t4, $t4, 1 # column counter incremented by 1
+ 
+addi $t2, $t2, -2048
+ 
+addi $t5, $t5, 2048
+ 
+bne $t4, $s2, remainingface_loop # if column counter is not equal to screen width, repeat remainingface_loop
+ 
+add $t2, $t2, $t5
+ 
+addi $t2, $t2, 4
+ 
+addi $t2, $t2, -2048
+ 
+addi $t3, $t3, 1
+ 
+li $t5, 0
+ 
+li $t4, 0
+ 
+bne $t3, $s3, remainingface_loop
+ 
+li $v0, 10
+ 
